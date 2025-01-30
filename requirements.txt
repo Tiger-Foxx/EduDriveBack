@@ -10,5 +10,3 @@ asgiref==3.6.0
 django-cors-headers==4.3.1  # Gestion des CORS pour l’API
 django-filter==23.2  # Filtres pour les vues Django et DRF
 requests==2.31.0  # Pour les appels API externes
-opencv-python==4.8.1.78  # Si besoin de traitement d’image avancé
-ffmpeg-python==0.2.0  # Si besoin de traitement vidéo/audio
