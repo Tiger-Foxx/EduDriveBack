@@ -1,18 +1,14 @@
-djangorestframework-simplejwt
-Django
-djangorestframework
-Pillow
-psycopg2-binary  # Pour PostgreSQL (si utilisé)
+Django==4.2.7
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.3.0
+Pillow==10.0.1
+psycopg2-binary==2.9.9  # Pour PostgreSQL (si utilisé)
 python-environ==0.4.54
 sqlparse==0.4.3
 tzdata==2022.7
 asgiref==3.6.0
-whitenoise  # Gestion des fichiers statiques
-django-cors-headers  # Gestion des CORS pour l’API
-django-environ  # Gestion des variables d’environnement
-djangorestframework-jsonapi  # Support JSON:API pour DRF
-djangorestframework-filters  # Filtres avancés pour DRF
-django-filter  # Filtres pour les vues Django et DRF
-requests  # Pour les appels API externes
-opencv-python  # Si besoin de traitement d’image avancé
-ffmpeg-python  # Si besoin de traitement vidéo/audio
+django-cors-headers==4.3.1  # Gestion des CORS pour l’API
+django-filter==23.2  # Filtres pour les vues Django et DRF
+requests==2.31.0  # Pour les appels API externes
+opencv-python==4.8.1.78  # Si besoin de traitement d’image avancé
+ffmpeg-python==0.2.0  # Si besoin de traitement vidéo/audio
