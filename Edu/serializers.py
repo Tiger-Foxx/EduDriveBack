@@ -1,9 +1,19 @@
 from rest_framework import serializers
 from validators import uuid
 
+from accounts.models import Withdrawal
+
 from .models import *
 
-class FormationSerializer(serializers.ModelSerializer):
+class FormationListSerializer(serializers.ModelSerializer):
+    """Serializer pour la liste des formations (vue légère)"""
+    class Meta:
+        model = Formation
+        fields = ['id', 'title', 'thumbnail', 'description', 'duration', 
+                 'points', 'participants_number', 'notation', 'created_at','category']
+
+class FormationDetailSerializer(serializers.ModelSerializer):
+    """Serializer pour le détail d'une formation (vue complète)"""
     class Meta:
         model = Formation
         fields = '__all__'
@@ -11,8 +21,8 @@ class FormationSerializer(serializers.ModelSerializer):
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ('id', 'payment_type', 'amount', 'status', 'payment_method')
-        read_only_fields = ('status', 'transaction_id')
+        fields = ('user', 'payment_type', 'amount', 'status', 'transaction_id', 'payment_method', 'payment_details')
+        read_only_fields = ('payment_date', 'status')
 
     def create(self, validated_data):
         # Générer un ID de transaction unique
@@ -31,3 +41,9 @@ class TelegramSubscriptionSerializer(serializers.ModelSerializer):
         model = TelegramSubscription
         fields = ('id', 'subscription_date', 'is_active')
         read_only_fields = ('subscription_date',)
+        
+class WithdrawalSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Withdrawal
+        fields = ['id', 'amount', 'beneficiary_name', 'beneficiary_number', 'status', 'created_at']
+        read_only_fields = ['status', 'created_at']

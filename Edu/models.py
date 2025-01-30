@@ -1,4 +1,5 @@
 # Edu/models.py
+import random
 from django.db import models
 from accounts.models import User
 
@@ -11,76 +12,140 @@ import subprocess
 from django.conf import settings
 from django.db import models
 
+import os
+import random
+import subprocess
+from PIL import Image
+from io import BytesIO
+from django.core.files import File
+from django.conf import settings
+from django.db import models
+from django.core.files.base import ContentFile
+import tempfile
 
 class Formation(models.Model):
     title = models.CharField(max_length=200)
     thumbnail = models.ImageField(upload_to='formations/thumbnails/')
     description = models.TextField(blank=True, null=True)
-    duration = models.CharField(max_length=50, blank=True, null=True)
+    duration = models.IntegerField(null=True, blank=True, default=6)
     presentation_video = models.FileField(
         upload_to='formations/videos/',
         blank=True,
         null=True
     )
+    CATEGORY_CHOICES = [
+        ('marketing', 'Marketing'),
+        ('development', 'Développement Personnel'),
+        ('business', 'Business'),
+        ('sales', 'Ventes'),
+        ('tech', 'Technologie'),
+        ('other', 'Autres'),
+    ]
+    category = models.CharField(
+        max_length=60,
+        choices=CATEGORY_CHOICES,
+        default='other'
+    )
     presentation_video_link = models.URLField(blank=True, null=True)
     drive_link = models.URLField()
-    points = models.IntegerField(default=0)
+    points = models.IntegerField(default=40)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    notions = models.TextField(blank=True, null=True)
+    participants_number = models.IntegerField(null=True, blank=True, default=2153)
+    notation = models.FloatField(null=True, blank=True, default=4.5)
 
-    def compress_image(self, image):
-        img = Image.open(image)
-
-        # Redimensionner si l'image est plus grande que 800x500
-        if img.height > 500 or img.width > 800:
-            output_size = (800, 500)
-            img.thumbnail(output_size, Image.LANCZOS)
-
-        # Créer un fichier temporaire
-        temp_thumb = NamedTemporaryFile(delete=True)
-
-        # Sauvegarder avec compression
-        if img.mode in ("RGBA", "P"):
-            img = img.convert("RGB")
-
-        img.save(temp_thumb, format='JPEG', quality=85, optimize=True)
-
-        temp_thumb.flush()
-        return File(temp_thumb)
-
-    def compress_video(self, video):
-        # Créer les chemins pour le fichier compressé
-        filename = os.path.splitext(os.path.basename(video.name))[0]
-        output_path = os.path.join(settings.MEDIA_ROOT, 'formations/videos',
-                                   f'{filename}_compressed.mp4')
-
-        # Commande ffmpeg pour compression vidéo
-        command = [
-            'ffmpeg', '-i', video.temporary_file_path(),
-            '-vcodec', 'libx264',
-            '-crf', '28',  # Facteur de compression (18-28 est bon)
-            '-preset', 'medium',  # Balance entre vitesse et compression
-            '-acodec', 'aac',
-            '-strict', 'experimental',
-            output_path
-        ]
-
+    def compress_image(self, image_field):
+        """Compresse une image tout en préservant son nom de fichier original"""
         try:
-            subprocess.run(command, check=True)
-            return File(open(output_path, 'rb'))
-        except subprocess.CalledProcessError:
-            return video
+            # Ouvre l'image
+            img = Image.open(image_field)
+            
+            # Convertit en RGB si nécessaire
+            if img.mode in ('RGBA', 'P'):
+                img = img.convert('RGB')
+            
+            # Redimensionne si nécessaire
+            if img.height > 500 or img.width > 800:
+                output_size = (800, 500)
+                img.thumbnail(output_size, Image.LANCZOS)
+            
+            # Prépare un buffer pour l'image compressée
+            output_io = BytesIO()
+            
+            # Sauvegarde avec compression
+            img.save(output_io, format='JPEG', quality=85, optimize=True)
+            
+            # Prépare le nom du fichier
+            original_name = os.path.splitext(image_field.name)[0]
+            new_name = f"{original_name}_compressed.jpg"
+            
+            # Crée un nouveau fichier Django
+            compressed_image = ContentFile(output_io.getvalue())
+            return compressed_image, new_name
+            
+        except Exception as e:
+            print(f"Erreur lors de la compression de l'image: {str(e)}")
+            return None, None
+
+    def compress_video(self, video_field):
+        """Compresse une vidéo en utilisant ffmpeg"""
+        try:
+            # Crée un dossier temporaire
+            with tempfile.TemporaryDirectory() as temp_dir:
+                # Prépare les chemins
+                input_path = os.path.join(temp_dir, 'input' + os.path.splitext(video_field.name)[1])
+                output_path = os.path.join(temp_dir, 'output.mp4')
+                
+                # Sauvegarde le fichier d'entrée
+                with open(input_path, 'wb') as f:
+                    for chunk in video_field.chunks():
+                        f.write(chunk)
+                
+                # Commande ffmpeg
+                command = [
+                    'ffmpeg', '-i', input_path,
+                    '-vcodec', 'libx264',
+                    '-crf', '28',
+                    '-preset', 'medium',
+                    '-acodec', 'aac',
+                    '-strict', 'experimental',
+                    output_path
+                ]
+                
+                # Exécute la compression
+                subprocess.run(command, check=True, capture_output=True)
+                
+                # Prépare le nom du fichier
+                original_name = os.path.splitext(video_field.name)[0]
+                new_name = f"{original_name}_compressed.mp4"
+                
+                # Crée un nouveau fichier Django
+                with open(output_path, 'rb') as f:
+                    compressed_video = ContentFile(f.read())
+                    return compressed_video, new_name
+                    
+        except Exception as e:
+            print(f"Erreur lors de la compression de la vidéo: {str(e)}")
+            return None, None
 
     def save(self, *args, **kwargs):
+        # Génère des statistiques aléatoires si c'est une nouvelle formation
+        if not self.pk:  # Si c'est une nouvelle formation
+            self.notation = round(random.uniform(4.0, 5.0), 1)
+            self.participants_number = random.randint(2150, 3250)
+
         # Compression de l'image
-        if self.thumbnail:
-            compressed_image = self.compress_image(self.thumbnail)
-            self.thumbnail = compressed_image
+        if self.thumbnail and hasattr(self.thumbnail, 'file'):
+            compressed_image, new_name = self.compress_image(self.thumbnail)
+            if compressed_image:
+                self.thumbnail.save(new_name, compressed_image, save=False)
 
         # Compression de la vidéo
-        if self.presentation_video and hasattr(self.presentation_video, 'temporary_file_path'):
-            compressed_video = self.compress_video(self.presentation_video)
-            self.presentation_video = compressed_video
+        if self.presentation_video and hasattr(self.presentation_video, 'file'):
+            compressed_video, new_name = self.compress_video(self.presentation_video)
+            if compressed_video:
+                self.presentation_video.save(new_name, compressed_video, save=False)
 
         super().save(*args, **kwargs)
 
@@ -89,8 +154,6 @@ class Formation(models.Model):
 
     class Meta:
         ordering = ['-points', '-created_at']
-
-
 
 class Inscription(models.Model):
     PAYMENT_STATUS_CHOICES = [

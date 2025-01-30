@@ -27,15 +27,21 @@ from accounts.views import *
 from Edu.views import *
 from accounts.models import *
 from Edu.models import *
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 router = DefaultRouter()
-router.register(r'users', UserViewSet)
-router.register(r'formations', FormationViewSet)
-router.register(r'payments', PaymentViewSet, basename='payment')
+router.register('users', UserViewSet,'users')
+router.register('formations', FormationViewSet,'formations')
+router.register('payments', PaymentViewSet, basename='payment')
+router.register('withdrawals', WithdrawalViewSet, 'withdrawals')
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('register/', UserRegistrationView.as_view(), name='user-registration'),
     path('login/', LoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(), name='logout'),
     path('webhook/payment/', PaymentWebhookView.as_view(), name='payment-webhook'),
+    # Inclusion des URLs du router
+     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),  # Route pour récupérer un access et refresh token
+path('token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),    path('', include(router.urls)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

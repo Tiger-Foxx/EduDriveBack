@@ -12,7 +12,7 @@ class FormationAdmin(admin.ModelAdmin):
             'fields': ('title', 'thumbnail', 'description')
         }),
         ('Détails de la formation', {
-            'fields': ('duration', 'presentation_video', 'drive_link')
+            'fields': ('duration', 'presentation_video', 'drive_link','presentation_video_link','category')
         }),
         ('Statistiques', {
             'fields': ('points',)
