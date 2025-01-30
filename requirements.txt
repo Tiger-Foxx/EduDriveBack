@@ -1,1 +1,26 @@
 djangorestframework-simplejwt
+Django
+djangorestframework
+Pillow
+psycopg2-binary  # Pour PostgreSQL (si utilisé)
+sqlite  # Si SQLite est utilisé (sinon à ignorer)
+gunicorn  # Pour le déploiement en production
+whitenoise  # Gestion des fichiers statiques
+django-cors-headers  # Gestion des CORS pour l’API
+django-environ  # Gestion des variables d’environnement
+drf-yasg  # Documentation automatique de l'API avec Swagger
+djangorestframework-jsonapi  # Support JSON:API pour DRF
+djangorestframework-filters  # Filtres avancés pour DRF
+django-filter  # Filtres pour les vues Django et DRF
+python-dotenv  # Chargement des variables d'environnement depuis .env
+requests  # Pour les appels API externes
+django-storages  # Pour la gestion des fichiers distants (S3, GCP, Azure)
+boto3  # Si stockage S3 utilisé
+google-cloud-storage  # Si stockage Google Cloud utilisé
+opencv-python  # Si besoin de traitement d’image avancé
+ffmpeg-python  # Si besoin de traitement vidéo/audio
+redis  # Si cache ou Celery utilisé
+celery  # Pour les tâches asynchrones
+channels  # Si websockets ou Django Channels utilisé
+daphne  # Serveur ASGI pour Django Channels
+geopy  # Si besoin de calculs géographiques (GPS, distances, etc.)
