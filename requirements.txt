@@ -7,15 +7,12 @@ python-environ==0.4.54
 sqlparse==0.4.3
 tzdata==2022.7
 asgiref==3.6.0
-gunicorn  # Pour le déploiement en production
 whitenoise  # Gestion des fichiers statiques
 django-cors-headers  # Gestion des CORS pour l’API
 django-environ  # Gestion des variables d’environnement
 djangorestframework-jsonapi  # Support JSON:API pour DRF
 djangorestframework-filters  # Filtres avancés pour DRF
 django-filter  # Filtres pour les vues Django et DRF
-python-dotenv  # Chargement des variables d'environnement depuis .env
 requests  # Pour les appels API externes
 opencv-python  # Si besoin de traitement d’image avancé
 ffmpeg-python  # Si besoin de traitement vidéo/audio
-channels  # Si websockets ou Django Channels utilisé
